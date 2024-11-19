@@ -1,47 +1,47 @@
-<script setup>
-import HelloWorld from './components/HelloWorld.vue'
-import TheWelcome from './components/TheWelcome.vue'
-</script>
-
 <template>
-  <header>
-    <img alt="Vue logo" class="logo" src="./assets/logo.svg" width="125" height="125" />
-
-    <div class="wrapper">
-      <HelloWorld msg="You did it!" />
-    </div>
-  </header>
-
-  <main>
-    <TheWelcome />
-  </main>
+  <div>
+    <h1>CROUD_test</h1>
+    <ItemForm @item-saved="fetchItems" :edit-item="selectedItem" />
+    <ItemList :items="items" @edit="editItem" @delete="deleteItem" />
+  </div>
 </template>
 
-<style scoped>
-header {
-  line-height: 1.5;
+<script>
+import apiClient from './api'
+import ItemList from './components/ItemList.vue'
+import ItemForm from './components/ItemForm.vue'
+
+export default {
+  components: {
+    ItemList,
+    ItemForm,
+  },
+  data() {
+    return {
+      items: [], // アイテム一覧
+      selectedItem: null, // 編集対象のアイテム
+    }
+  },
+  methods: {
+    // アイテム一覧を取得
+    fetchItems() {
+      apiClient.get('/items').then((response) => {
+        this.items = response.data
+      })
+    },
+    // 編集時の処理
+    editItem(item) {
+      this.selectedItem = item // 編集対象を選択
+    },
+    // 削除処理
+    deleteItem(id) {
+      apiClient.delete(`/items/${id}`).then(() => {
+        this.fetchItems() // 再取得
+      })
+    },
+  },
+  mounted() {
+    this.fetchItems() // 初期データ取得
+  },
 }
-
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
-}
-
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
-  }
-
-  .logo {
-    margin: 0 2rem 0 0;
-  }
-
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
-  }
-}
-</style>
+</script>
